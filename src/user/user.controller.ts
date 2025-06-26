@@ -2,6 +2,8 @@ import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { UserService } from './user.service';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+import { instanceToPlain, plainToInstance } from 'class-transformer';
+import { UserResponseDto } from './dto/user-response.dto';
 
 @Controller('user')
 export class UserController {
@@ -10,7 +12,11 @@ export class UserController {
   @Get('me')
   @UseGuards(AuthGuard('jwt'))
   async getProfile(@Req() req: AuthenticatedRequest) {
-    console.log(req.user, 'req');
-    return this.userService.findById(req.user.userId);
+    const user = await this.userService.findById(req.user.userId);
+    const transformed = plainToInstance(UserResponseDto, user, {
+      excludeExtraneousValues: true,
+    });
+
+    return instanceToPlain(transformed);
   }
 }

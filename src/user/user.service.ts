@@ -34,14 +34,19 @@ export class UserService {
   }
 
   async createuser(userDto: CreateUserDto): Promise<User> {
-    const { username, password } = userDto;
+    const { username, password, firstname, lastname } = userDto;
     const existing = await this.userRepo.findOne({ where: { username } });
     if (existing) {
       throw new ConflictException('Username already taken');
     }
 
     const hashed = await bcrypt.hash(password, 12);
-    const user = this.userRepo.create({ username, password: hashed });
+    const user = this.userRepo.create({
+      username,
+      password: hashed,
+      firstname,
+      lastname,
+    });
     return this.userRepo.save(user);
   }
 }

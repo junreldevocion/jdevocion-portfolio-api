@@ -1,4 +1,5 @@
 import { Techstack } from 'src/techstack/entities/techstack.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,6 +8,7 @@ import {
   UpdateDateColumn,
   OneToMany,
   JoinTable,
+  ManyToOne,
 } from 'typeorm';
 
 @Entity()
@@ -35,6 +37,12 @@ export class Project {
   })
   @JoinTable()
   techStacks: Techstack[];
+
+  @ManyToOne(() => User, (user) => user.projects, { eager: false })
+  user: User;
+
+  @Column()
+  userId: number;
 
   @CreateDateColumn()
   createdAt: Date;

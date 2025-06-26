@@ -7,19 +7,28 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
 import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from './entities/project.entity';
 import { UpdateProjectDto } from './dto/update-project.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
 
 @Controller('project')
 export class ProjectController {
   constructor(private projectService: ProjectService) {}
 
+  @UseGuards(AuthGuard('jwt'))
   @Post()
-  create(@Body() createProjectDto: CreateProjectDto): Promise<Project> {
-    return this.projectService.create(createProjectDto);
+  create(
+    @Req() req: AuthenticatedRequest,
+    @Body() createProjectDto: CreateProjectDto,
+  ): Promise<Project> {
+    const user = req.user;
+    return this.projectService.create(createProjectDto, user.userId);
   }
 
   @Get()

@@ -15,7 +15,10 @@ export class ProjectService {
     private techStackRepo: Repository<Techstack>,
   ) {}
 
-  async create(createProjectDto: CreateProjectDto): Promise<Project> {
+  async create(
+    createProjectDto: CreateProjectDto,
+    userId: number,
+  ): Promise<Project> {
     const techEntities = await Promise.all(
       createProjectDto.techStacks.map(async ({ name }) => {
         let tech = await this.techStackRepo.findOne({
@@ -32,6 +35,7 @@ export class ProjectService {
     const project = this.projectRepo.create({
       ...createProjectDto,
       techStacks: techEntities,
+      user: { id: userId },
     });
     return this.projectRepo.save(project);
   }
