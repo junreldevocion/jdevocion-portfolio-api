@@ -1,4 +1,5 @@
 import { Project } from 'src/project/entities/project.entity';
+import { User } from 'src/user/entities/user.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -20,6 +21,9 @@ export class Techstack {
     onDelete: 'CASCADE',
   })
   projects: Project[];
+
+  @ManyToOne(() => User, { nullable: false })
+  createdBy: User;
 
   @CreateDateColumn()
   createdAt: Date;

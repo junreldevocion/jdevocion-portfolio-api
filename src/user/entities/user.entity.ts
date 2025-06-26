@@ -1,4 +1,5 @@
 import { Project } from 'src/project/entities/project.entity';
+import { Techstack } from 'src/techstack/entities/techstack.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
 @Entity()
@@ -20,4 +21,7 @@ export class User {
 
   @OneToMany(() => Project, (project) => project.user)
   projects: Project[];
+
+  @OneToMany(() => Techstack, (stack) => stack.createdBy)
+  createdStacks: Techstack[];
 }

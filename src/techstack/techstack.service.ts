@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  ConflictException,
+  Injectable,
+  NotFoundException,
+} from '@nestjs/common';
 import { Techstack } from './entities/techstack.entity';
 import { Repository } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -12,9 +16,19 @@ export class TechstackService {
     private techStackRepo: Repository<Techstack>,
   ) {}
 
-  async create(techStackDto: CreateTechstackDto): Promise<Techstack> {
-    const techStack = this.techStackRepo.create(techStackDto);
-    return this.techStackRepo.save(techStack);
+  async create(dto: CreateTechstackDto, userId: number): Promise<Techstack> {
+    const exists = await this.techStackRepo.findOne({
+      where: { name: dto.name },
+    });
+    if (exists) {
+      throw new ConflictException('Tech stack already exist!');
+    }
+
+    const stack = this.techStackRepo.create({
+      ...dto,
+      createdBy: { id: userId },
+    });
+    return this.techStackRepo.save(stack);
   }
 
   findAll(): Promise<Techstack[]> {
