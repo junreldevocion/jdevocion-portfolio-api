@@ -17,12 +17,15 @@ export class ProjectService {
 
   async create(createProjectDto: CreateProjectDto): Promise<Project> {
     const techEntities = await Promise.all(
-      createProjectDto.techStacks.map(async (name) => {
-        const techStack = await this.techStackRepo.findOne({ where: { name } });
-        if (!techStack) {
-          throw new NotFoundException('Techstack not found');
+      createProjectDto.techStacks.map(async ({ name }) => {
+        let tech = await this.techStackRepo.findOne({
+          where: { name },
+        });
+        if (!tech) {
+          tech = this.techStackRepo.create({ name });
+          tech = await this.techStackRepo.save(tech);
         }
-        return techStack || this.techStackRepo.create({ name });
+        return tech;
       }),
     );
 

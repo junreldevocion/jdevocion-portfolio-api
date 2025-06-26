@@ -37,7 +37,7 @@ export class TechstackService {
     if (!techStack) {
       throw new NotFoundException('Techstack not found');
     }
-    Object.assign(techStack, { techStackDto });
+    Object.assign(techStack, techStackDto);
     return this.techStackRepo.save(techStack);
   }
 

@@ -1,5 +1,12 @@
 import { Project } from 'src/project/entities/project.entity';
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 @Entity()
 export class Techstack {
@@ -13,4 +20,10 @@ export class Techstack {
     onDelete: 'CASCADE',
   })
   projects: Project[];
+
+  @CreateDateColumn()
+  createdAt: Date;
+
+  @UpdateDateColumn()
+  updatedAt: Date;
 }

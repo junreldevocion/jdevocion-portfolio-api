@@ -26,7 +26,7 @@ export class Project {
   @Column({ nullable: true })
   liveDemoUrl: string;
 
-  @Column()
+  @Column({ nullable: true })
   imageUrl: string;
 
   @OneToMany(() => Techstack, (techstack) => techstack.projects, {

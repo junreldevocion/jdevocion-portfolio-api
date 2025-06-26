@@ -5,27 +5,26 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { ProjectModule } from './project/project.module';
 import { ConfigModule } from '@nestjs/config';
 import { TechstackModule } from './techstack/techstack.module';
+import { DatabaseConfigService } from './config/database.config';
+import { AuthModule } from './auth/auth.module';
+import { UserModule } from './user/user.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // makes it available everywhere
     }),
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: process.env.DB_HOST,
-      port: Number(process.env.DB_PORT) || 3306,
-      username: process.env.DB_USER,
-      password: process.env.DB_PASS,
-      database: process.env.DB_NAME,
-      entities: [__dirname + '/**/**/*.entity{.ts,.js}'],
-      autoLoadEntities: true,
-      synchronize: true,
+    TypeOrmModule.forRootAsync({
+      imports: [],
+      inject: [DatabaseConfigService],
+      useClass: DatabaseConfigService,
     }),
     ProjectModule,
     TechstackModule,
+    AuthModule,
+    UserModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, DatabaseConfigService],
 })
 export class AppModule {}
