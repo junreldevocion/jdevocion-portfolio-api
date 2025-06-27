@@ -40,16 +40,26 @@ export class TechstackController {
     return this.techStackService.findOne(id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateTechstackDto: UpdateTechstackDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<Techstack> {
-    return this.techStackService.update(id, updateTechstackDto);
+    return this.techStackService.update(
+      id,
+      updateTechstackDto,
+      req.user.userId,
+    );
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.techStackService.remove(id);
+  remove(
+    @Param('id') id: number,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ message: string }> {
+    return this.techStackService.remove(+id, req.user.userId);
   }
 }

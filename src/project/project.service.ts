@@ -54,20 +54,46 @@ export class ProjectService {
 
   async update(
     id: number,
-    updateProjectDto: UpdateProjectDto,
+    dto: UpdateProjectDto,
+    userId: number,
   ): Promise<Project> {
-    const project = await this.findOne(id);
+    const project = await this.projectRepo.findOne({
+      where: { id, user: { id: userId } },
+      relations: ['techStacks'],
+    });
     if (!project) {
       throw new NotFoundException('Project not found');
     }
-    Object.assign(project, updateProjectDto);
+    if (dto.techStacks) {
+      const resolveTechstacks = await Promise.all(
+        dto.techStacks.map(async ({ name }) => {
+          const existing = await this.techStackRepo.findOne({
+            where: { name },
+          });
+
+          return (
+            existing ??
+            this.techStackRepo.save(this.techStackRepo.create({ name }))
+          );
+        }),
+      );
+
+      project.techStacks = resolveTechstacks;
+    }
+    Object.assign(project, dto);
     return this.projectRepo.save(project);
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.projectRepo.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException('Project not found');
+  async remove(id: number, userId: number): Promise<{ message: string }> {
+    const result = await this.projectRepo.findOne({
+      where: { id, user: { id: userId } },
+    });
+    if (!result) {
+      throw new NotFoundException('Project not found or not owned by the user');
     }
+
+    await this.projectRepo.remove(result);
+
+    return { message: 'Project successfully deleted' };
   }
 }

@@ -46,8 +46,11 @@ export class TechstackService {
   async update(
     id: number,
     techStackDto: UpdateTechstackDto,
+    userId: number,
   ): Promise<Techstack> {
-    const techStack = await this.findOne(id);
+    const techStack = await this.techStackRepo.findOne({
+      where: { id, createdBy: { id: userId } },
+    });
     if (!techStack) {
       throw new NotFoundException('Techstack not found');
     }
@@ -55,10 +58,16 @@ export class TechstackService {
     return this.techStackRepo.save(techStack);
   }
 
-  async remove(id: number): Promise<void> {
-    const result = await this.techStackRepo.delete(id);
-    if (result.affected === 0) {
-      throw new NotFoundException('Techstack not found');
+  async remove(id: number, userId: number): Promise<{ message: string }> {
+    const result = await this.techStackRepo.findOne({
+      where: { id, createdBy: { id: userId } },
+    });
+    if (!result) {
+      throw new NotFoundException('Techstack not found or not owned by user');
     }
+
+    await this.techStackRepo.remove(result);
+
+    return { message: 'Techstach successfully deleted!' };
   }
 }

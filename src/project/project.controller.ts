@@ -41,16 +41,22 @@ export class ProjectController {
     return this.projectService.findOne(id);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updateProjectDto: UpdateProjectDto,
+    @Req() req: AuthenticatedRequest,
   ): Promise<Project> {
-    return this.projectService.update(id, updateProjectDto);
+    return this.projectService.update(id, updateProjectDto, req.user.userId);
   }
 
+  @UseGuards(AuthGuard('jwt'))
   @Delete(':id')
-  remove(@Param('id', ParseIntPipe) id: number): Promise<void> {
-    return this.projectService.remove(id);
+  remove(
+    @Param('id', ParseIntPipe) id: number,
+    @Req() req: AuthenticatedRequest,
+  ): Promise<{ message: string }> {
+    return this.projectService.remove(id, req.user.userId);
   }
 }

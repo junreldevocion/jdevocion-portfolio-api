@@ -1,3 +1,4 @@
+import { EmploymentHistory } from 'src/employment-history/entities/employment-history.entity';
 import { Project } from 'src/project/entities/project.entity';
 import { Techstack } from 'src/techstack/entities/techstack.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
@@ -21,6 +22,12 @@ export class User {
 
   @OneToMany(() => Project, (project) => project.user)
   projects: Project[];
+
+  @OneToMany(
+    () => EmploymentHistory,
+    (employmentHistory) => employmentHistory.user,
+  )
+  employmentHistory: EmploymentHistory[];
 
   @OneToMany(() => Techstack, (stack) => stack.createdBy)
   createdStacks: Techstack[];

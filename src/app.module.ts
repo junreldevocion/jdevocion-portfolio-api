@@ -8,6 +8,7 @@ import { TechstackModule } from './techstack/techstack.module';
 import { DatabaseConfigService } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
+import { EmploymentHistoryModule } from './employment-history/employment-history.module';
 
 @Module({
   imports: [
@@ -23,6 +24,7 @@ import { UserModule } from './user/user.module';
     TechstackModule,
     AuthModule,
     UserModule,
+    EmploymentHistoryModule,
   ],
   controllers: [AppController],
   providers: [AppService, DatabaseConfigService],
