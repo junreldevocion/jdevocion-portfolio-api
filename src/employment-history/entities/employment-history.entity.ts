@@ -2,12 +2,13 @@ import { Techstack } from 'src/techstack/entities/techstack.entity';
 import { User } from 'src/user/entities/user.entity';
 import {
   Column,
+  Entity,
   JoinTable,
   ManyToMany,
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
-
+@Entity()
 export class EmploymentHistory {
   @PrimaryGeneratedColumn()
   id: number;
@@ -34,7 +35,7 @@ export class EmploymentHistory {
   @JoinTable()
   techstacks: Techstack[];
 
-  @ManyToOne(() => User, (user) => user.employmentHistory)
+  @ManyToOne(() => User, (user) => user.employmentHistories)
   @JoinTable()
   user: User;
 }

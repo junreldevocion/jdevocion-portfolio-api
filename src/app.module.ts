@@ -9,16 +9,19 @@ import { DatabaseConfigService } from './config/database.config';
 import { AuthModule } from './auth/auth.module';
 import { UserModule } from './user/user.module';
 import { EmploymentHistoryModule } from './employment-history/employment-history.module';
+import { DatabaseConfigModule } from './config/database-config.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true, // makes it available everywhere
     }),
+    DatabaseConfigModule,
     TypeOrmModule.forRootAsync({
-      imports: [],
+      imports: [DatabaseConfigModule],
       inject: [DatabaseConfigService],
-      useClass: DatabaseConfigService,
+      useFactory: (dbConfig: DatabaseConfigService) =>
+        dbConfig.getTypeOrmConfig(),
     }),
     ProjectModule,
     TechstackModule,
@@ -27,6 +30,6 @@ import { EmploymentHistoryModule } from './employment-history/employment-history
     EmploymentHistoryModule,
   ],
   controllers: [AppController],
-  providers: [AppService, DatabaseConfigService],
+  providers: [AppService],
 })
 export class AppModule {}

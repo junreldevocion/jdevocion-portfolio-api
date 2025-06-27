@@ -23,11 +23,8 @@ export class User {
   @OneToMany(() => Project, (project) => project.user)
   projects: Project[];
 
-  @OneToMany(
-    () => EmploymentHistory,
-    (employmentHistory) => employmentHistory.user,
-  )
-  employmentHistory: EmploymentHistory[];
+  @OneToMany(() => EmploymentHistory, (history) => history.user)
+  employmentHistories: EmploymentHistory[];
 
   @OneToMany(() => Techstack, (stack) => stack.createdBy)
   createdStacks: Techstack[];
