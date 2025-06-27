@@ -1,11 +1,13 @@
+import { Type } from 'class-transformer';
 import {
   IsArray,
   IsBoolean,
   IsDateString,
   IsOptional,
   IsString,
+  ValidateNested,
 } from 'class-validator';
-import { Techstack } from 'src/techstack/entities/techstack.entity';
+import { CreateTechstackDto } from 'src/techstack/dto/create-techstack.dto';
 
 export class CreateEmploymentHistoryDto {
   @IsString()
@@ -29,6 +31,7 @@ export class CreateEmploymentHistoryDto {
   isCurrent: boolean;
 
   @IsArray()
-  @IsString({ each: true })
-  techStacks: Techstack[];
+  @ValidateNested({ each: true })
+  @Type(() => CreateTechstackDto)
+  techstacks: CreateTechstackDto[];
 }

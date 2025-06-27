@@ -16,12 +16,15 @@ import { Project } from './entities/project.entity';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from 'src/user/entities/user.entity';
 
 @Controller('project')
 export class ProjectController {
   constructor(private projectService: ProjectService) {}
 
   @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN)
   @Post()
   create(
     @Req() req: AuthenticatedRequest,
@@ -42,6 +45,7 @@ export class ProjectController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -52,6 +56,7 @@ export class ProjectController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN)
   @Delete(':id')
   remove(
     @Param('id', ParseIntPipe) id: number,

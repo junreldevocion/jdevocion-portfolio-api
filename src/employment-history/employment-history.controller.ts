@@ -14,6 +14,9 @@ import { CreateEmploymentHistoryDto } from './dto/create-employment-history.dto'
 import { UpdateEmploymentHistoryDto } from './dto/update-employment-history.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from 'src/user/entities/user.entity';
+import { RolesGuard } from 'src/auth/roles.guard';
 
 @Controller('employment-history')
 export class EmploymentHistoryController {
@@ -21,21 +24,19 @@ export class EmploymentHistoryController {
     private readonly employmentHistoryService: EmploymentHistoryService,
   ) {}
 
-  @UseGuards(AuthGuard('jwt'))
+  @UseGuards(AuthGuard('jwt'), RolesGuard)
+  @Roles(UserRole.ADMIN)
   @Post()
   create(
     @Req() req: AuthenticatedRequest,
-    @Body() createEmploymentHistoryDto: CreateEmploymentHistoryDto,
+    @Body() dto: CreateEmploymentHistoryDto,
   ) {
-    return this.employmentHistoryService.create(
-      createEmploymentHistoryDto,
-      req.user.userId,
-    );
+    return this.employmentHistoryService.create(dto, req.user.userId);
   }
 
   @Get()
   findAll() {
-    return this.employmentHistoryService.findAll();
+    return this.employmentHistoryService.findAllWithRelations();
   }
 
   @Get(':id')
@@ -44,7 +45,7 @@ export class EmploymentHistoryController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post()
+  @Roles(UserRole.ADMIN)
   @Patch(':id')
   update(
     @Req() req: AuthenticatedRequest,
@@ -59,7 +60,7 @@ export class EmploymentHistoryController {
   }
 
   @UseGuards(AuthGuard('jwt'))
-  @Post()
+  @Roles(UserRole.ADMIN)
   @Delete(':id')
   remove(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
     return this.employmentHistoryService.remove(+id, req.user.userId);

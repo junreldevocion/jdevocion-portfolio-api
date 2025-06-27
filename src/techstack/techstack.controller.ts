@@ -16,12 +16,15 @@ import { CreateTechstackDto } from './dto/create-techstack.dto';
 import { UpdateTechstackDto } from './dto/update-techstack.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
+import { Roles } from 'src/auth/roles.decorator';
+import { UserRole } from 'src/user/entities/user.entity';
 
 @Controller('techstack')
 export class TechstackController {
   constructor(private techStackService: TechstackService) {}
 
   @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN)
   @Post()
   create(
     @Req() req: AuthenticatedRequest,
@@ -41,6 +44,7 @@ export class TechstackController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -55,6 +59,7 @@ export class TechstackController {
   }
 
   @UseGuards(AuthGuard('jwt'))
+  @Roles(UserRole.ADMIN)
   @Delete(':id')
   remove(
     @Param('id') id: number,

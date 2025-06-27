@@ -3,6 +3,11 @@ import { Project } from 'src/project/entities/project.entity';
 import { Techstack } from 'src/techstack/entities/techstack.entity';
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 
+export enum UserRole {
+  ADMIN = 'admin',
+  USER = 'user',
+}
+
 @Entity()
 export class User {
   @PrimaryGeneratedColumn()
@@ -28,4 +33,7 @@ export class User {
 
   @OneToMany(() => Techstack, (stack) => stack.createdBy)
   createdStacks: Techstack[];
+
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
+  role: UserRole;
 }

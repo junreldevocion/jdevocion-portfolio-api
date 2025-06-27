@@ -5,10 +5,14 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { EmploymentHistory } from './entities/employment-history.entity';
 import { Repository } from 'typeorm';
 import { Techstack } from 'src/techstack/entities/techstack.entity';
+import { UserService } from 'src/user/user.service';
+import { EmploymentResponseHistoryDto } from './dto/employment-response-history.dto';
+import { toEmploymentResponseDto } from './utils/employment-mapper';
 
 @Injectable()
 export class EmploymentHistoryService {
   constructor(
+    private readonly userService: UserService,
     @InjectRepository(EmploymentHistory)
     private employmentRepo: Repository<EmploymentHistory>,
     @InjectRepository(Techstack)
@@ -16,13 +20,16 @@ export class EmploymentHistoryService {
   ) {}
 
   async create(dto: CreateEmploymentHistoryDto, userId: number) {
+    const user = await this.userService.findById(userId);
     const techEntities = await Promise.all(
-      dto.techStacks.map(async ({ name }) => {
+      dto.techstacks.map(async ({ name }) => {
         const existing = await this.techStackRepo.findOne({ where: { name } });
 
         return (
           existing ||
-          this.techStackRepo.save(this.techStackRepo.create({ name }))
+          this.techStackRepo.save(
+            this.techStackRepo.create({ name, createdBy: user }),
+          )
         );
       }),
     );
@@ -64,9 +71,9 @@ export class EmploymentHistoryService {
 
     Object.assign(history, dto);
 
-    if (dto.techStacks) {
+    if (dto.techstacks) {
       const resolveTechstacks = await Promise.all(
-        dto.techStacks.map(async ({ name }) => {
+        dto.techstacks.map(async ({ name }) => {
           const existing = await this.techStackRepo.findOne({
             where: { name },
           });
@@ -97,5 +104,13 @@ export class EmploymentHistoryService {
 
     await this.employmentRepo.remove(history);
     return { message: 'Employment history deleted successfully' };
+  }
+
+  async findAllWithRelations(): Promise<EmploymentResponseHistoryDto[]> {
+    const histories = await this.employmentRepo.find({
+      relations: ['techstacks', 'user'],
+    });
+
+    return histories.map((h) => toEmploymentResponseDto(h));
   }
 }
