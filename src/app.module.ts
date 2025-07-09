@@ -16,13 +16,13 @@ import { DatabaseConfigModule } from './config/database-config.module';
     ConfigModule.forRoot({
       isGlobal: true, // makes it available everywhere
     }),
-    DatabaseConfigModule,
     TypeOrmModule.forRootAsync({
       imports: [DatabaseConfigModule],
       inject: [DatabaseConfigService],
       useFactory: (dbConfig: DatabaseConfigService) =>
         dbConfig.getTypeOrmConfig(),
     }),
+    DatabaseConfigModule,
     ProjectModule,
     TechstackModule,
     AuthModule,

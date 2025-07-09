@@ -1,4 +1,5 @@
 import {
+  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -8,30 +9,62 @@ import {
   Patch,
   Post,
   Req,
+  UploadedFile,
   UseGuards,
+  UseInterceptors,
 } from '@nestjs/common';
 import { ProjectService } from './project.service';
-import { CreateProjectDto } from './dto/create-project.dto';
 import { Project } from './entities/project.entity';
 import { UpdateProjectDto } from './dto/update-project.dto';
 import { AuthGuard } from '@nestjs/passport';
 import { AuthenticatedRequest } from 'src/auth/interfaces/authenticated-request.interface';
 import { Roles } from 'src/auth/roles.decorator';
 import { UserRole } from 'src/user/entities/user.entity';
+import { S3Service } from 'src/shared/s3/s3.service';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { RawCreateProjectDto } from './dto/raw-create-project.dto';
 
 @Controller('project')
 export class ProjectController {
-  constructor(private projectService: ProjectService) {}
+  constructor(
+    private projectService: ProjectService,
+    private s3Service: S3Service,
+  ) {}
 
+  @Post()
   @UseGuards(AuthGuard('jwt'))
   @Roles(UserRole.ADMIN)
-  @Post()
-  create(
+  @UseInterceptors(
+    FileInterceptor('file', {
+      limits: { fileSize: 5 * 1024 * 1024 },
+      fileFilter: (req, file, cb) => {
+        if (!file.mimetype.match(/(jpg|jpeg|png|gif)$/)) {
+          return cb(
+            new BadRequestException('Only image files are allowed'),
+            false,
+          );
+        }
+        cb(null, true);
+      },
+    }),
+  )
+  async create(
     @Req() req: AuthenticatedRequest,
-    @Body() createProjectDto: CreateProjectDto,
+    @Body() createProjectDto: RawCreateProjectDto,
+    @UploadedFile() file: Express.Multer.File,
   ): Promise<Project> {
+    console.log(createProjectDto, 'createProjectDto');
     const user = req.user;
-    return this.projectService.create(createProjectDto, user.userId);
+
+    const imageUrl = await this.s3Service.uploadFile(
+      file.buffer,
+      file.originalname,
+      file.mimetype,
+    );
+    return this.projectService.create(
+      { ...createProjectDto, imageUrl },
+      user.userId,
+    );
   }
 
   @Get()

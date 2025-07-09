@@ -21,10 +21,6 @@ export class CreateProjectDto {
   liveDemoUrl: string;
 
   @Expose()
-  @IsUrl()
-  imageUrl: string;
-
-  @Expose()
   @IsArray()
   @ValidateNested({ each: true })
   @Type(() => CreateTechstackDto)

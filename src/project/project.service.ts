@@ -16,7 +16,7 @@ export class ProjectService {
   ) {}
 
   async create(
-    createProjectDto: CreateProjectDto,
+    createProjectDto: CreateProjectDto & { imageUrl: string },
     userId: number,
   ): Promise<Project> {
     const techEntities = await Promise.all(

@@ -1,70 +1,73 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { EmploymentHistoryService } from './employment-history.service';
-import { Repository } from 'typeorm';
-import { EmploymentHistory } from './entities/employment-history.entity';
 import { getRepositoryToken } from '@nestjs/typeorm';
-import { CreateEmploymentHistoryDto } from './dto/create-employment-history.dto';
-import { User } from 'src/user/entities/user.entity';
+import { EmploymentHistory } from './entities/employment-history.entity';
 import { Techstack } from '../techstack/entities/techstack.entity';
-
-function createMockTechstack(name: string): Techstack {
-  return {
-    id: Math.floor(Math.random() * 100),
-    name,
-    createdAt: new Date(),
-    updatedAt: new Date(),
-    createdBy: { id: 1 } as User,
-    projects: [],
-  };
-}
+import { CreateEmploymentHistoryDto } from './dto/create-employment-history.dto';
+import { User } from '../user/entities/user.entity';
+import { UserService } from 'src/user/user.service';
 
 describe('EmploymentHistoryService', () => {
   let service: EmploymentHistoryService;
-  let repo: jest.Mocked<Repository<EmploymentHistory>>;
+
+  const mockRepo = {
+    create: jest.fn(),
+    save: jest.fn(),
+  };
+
+  const mockUserService = {
+    findById: jest.fn(),
+  };
 
   beforeEach(async () => {
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         EmploymentHistoryService,
         {
+          provide: UserService,
+          useValue: mockUserService, // Mock UserService
+        },
+        {
           provide: getRepositoryToken(EmploymentHistory),
-          useValue: {
-            create: jest.fn(),
-            save: jest.fn(),
-          } as Partial<jest.Mocked<Repository<EmploymentHistory>>>,
+          useValue: mockRepo, // Mock EmploymentHistoryRepository
+        },
+        {
+          provide: getRepositoryToken(Techstack),
+          useValue: {}, // Mock TechstackRepository
         },
       ],
     }).compile();
 
     service = module.get<EmploymentHistoryService>(EmploymentHistoryService);
-    repo = module.get(getRepositoryToken(EmploymentHistory));
   });
 
-  it('it should create a history', async () => {
+  it('should be defined', () => {
+    expect(service).toBeDefined();
+  });
+
+  it('should create a new employment history record', async () => {
     const dto: CreateEmploymentHistoryDto = {
       company: 'OpenAI',
-      position: 'Senior Dev',
-      startDate: '2020-01-01',
-      endDate: '',
-      isCurrent: true,
-      description: 'Building LLMs',
-      techstacks: [createMockTechstack('nestjs')],
-    };
-    const mockEntity = {
-      id: 1,
-      ...dto,
-      user: { id: 1 } as User,
-      techstacks: dto.techstacks.map((ts) => createMockTechstack(ts.name)),
+      position: 'Dev',
+      startDate: '2021-01-01',
+      endDate: '2023-01-01',
+      isCurrent: false,
+      description: 'Worked on AI models',
+      techstacks: [], // optional for this test
     };
 
-    repo.create.mockReturnValue(mockEntity);
-    repo.save.mockResolvedValue(mockEntity);
+    const mockUser = { id: 1 } as User;
+    const mockEntity = { id: 10, ...dto, user: mockUser };
+
+    mockUserService.findById.mockResolvedValue(mockUser);
+    mockRepo.create.mockReturnValue(mockEntity);
+    mockRepo.save.mockResolvedValue(mockEntity);
+
     const result = await service.create(dto, 1);
-    expect(repo.create).toHaveBeenCalledWith({
-      ...dto,
-      user: { id: 1 },
-    });
-    expect(repo.save).toHaveBeenCalledWith(mockEntity);
+
+    expect(mockUserService.findById).toHaveBeenCalledWith(1);
+    expect(mockRepo.create).toHaveBeenCalledWith({ ...dto, user: mockUser });
+    expect(mockRepo.save).toHaveBeenCalledWith(mockEntity);
     expect(result).toEqual(mockEntity);
   });
 });
