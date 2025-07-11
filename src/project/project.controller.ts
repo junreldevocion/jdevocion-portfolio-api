@@ -53,7 +53,6 @@ export class ProjectController {
     @Body() createProjectDto: RawCreateProjectDto,
     @UploadedFile() file: Express.Multer.File,
   ): Promise<Project> {
-    console.log(createProjectDto, 'createProjectDto');
     const user = req.user;
 
     const imageUrl = await this.s3Service.uploadFile(

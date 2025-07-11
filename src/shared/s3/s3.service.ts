@@ -30,19 +30,21 @@ export class S3Service {
 
   async uploadFile(
     buffer: Buffer,
-    key: string,
+    originalName: string,
     mimetype: string,
   ): Promise<string> {
     const bucket = this.configService.get<string>('AWS_BUCKET_NAME');
+    const timestamp = Date.now();
+    const fileNameWithoutExtension = originalName.split('.').shift();
+    const extension = originalName.split('.').pop();
+    const key = `${fileNameWithoutExtension}-${timestamp}.${extension}`;
     const command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
       Body: buffer,
       ContentType: mimetype,
-      ACL: 'public-read',
     });
     await this.s3Client.send(command);
-
     return `https://${bucket}.s3.${this.configService.get<string>('AWS_REGION')}.amazonaws.com/${key}`;
   }
 }

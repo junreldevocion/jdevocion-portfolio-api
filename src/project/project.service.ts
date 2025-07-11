@@ -25,7 +25,7 @@ export class ProjectService {
           where: { name },
         });
         if (!tech) {
-          tech = this.techStackRepo.create({ name });
+          tech = this.techStackRepo.create({ name, createdBy: { id: userId } });
           tech = await this.techStackRepo.save(tech);
         }
         return tech;
